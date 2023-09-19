@@ -1,59 +1,64 @@
-import time
-import xbmc, xbmcgui, xbmcaddon
+import xbmc
+import xbmcgui
+import xbmcaddon
+
 
 class MediaIterator:
     def __init__(self):
         pass
 
     def forward(self):
-        pass
+        raise NotImplementedError("This method must be overridden.")
 
     def back(self):
-        pass
+        raise NotImplementedError("This method must be overridden.")
 
     def getCurrUrl(self):
-        pass
+        raise NotImplementedError("This method must be overridden.")
 
     def isCurrVideo(self):
-        pass
+        raise NotImplementedError("This method must be overridden.")
 
     def getVideoUrl(self):
-        pass
+        raise NotImplementedError("This method must be overridden.")
 
 
 class MediaWindow(xbmcgui.WindowXMLDialog):
-    def __new__(cls, *args, **kwargs):
-        return super(MediaWindow, cls).__new__(cls, "ViewerWindow.xml", xbmcaddon.Addon(id='script.module.mediaviewer').getAddonInfo('path'))
+    ACTION_MAP = {
+        xbmcgui.ACTION_MOVE_LEFT: 'back',
+        xbmcgui.ACTION_MOVE_RIGHT: 'forward',
+        xbmcgui.ACTION_SELECT_ITEM: 'playVideo',
+        xbmcgui.ACTION_ENTER: 'playVideo',
+        xbmcgui.ACTION_PLAY: 'playVideo'
+    }
+
+    BLACK_OVERLAY = 1
+    IMG_CONTROL = 2
+    PLAY_BUTTON = 3
 
     def __init__(self, iterator):
+        super().__init__("ViewerWindow.xml", xbmcaddon.Addon(
+            id='script.module.mediaviewer').getAddonInfo('path'))
         self.iterator = iterator
         self.img = None
-        # Stops the menus showing through whilst images are loading
         self.blackOverlay = None
         self.playButton = None
         self.player = MediaWindowPlayer(self)
         self.isVideoPlaying = False
 
     def onInit(self):
-        self.blackOverlay = self.getControl(1)
-        self.img = self.getControl(2)
-        self.playButton = self.getControl(3)
+        self.blackOverlay = self.getControl(self.BLACK_OVERLAY)
+        self.img = self.getControl(self.IMG_CONTROL)
+        self.playButton = self.getControl(self.PLAY_BUTTON)
         self.setContent()
 
     def onAction(self, action):
+        func_name = self.ACTION_MAP.get(action)
+        if not self.isVideoPlaying and func_name:
+            getattr(self, func_name)()
+            self.setContent()
 
-        if not self.isVideoPlaying:
-            if action == xbmcgui.ACTION_MOVE_LEFT:
-                self.iterator.back()
-                self.setContent()
-            elif action == xbmcgui.ACTION_MOVE_RIGHT:
-                self.iterator.forward()
-                self.setContent()
-            elif action == xbmcgui.ACTION_SELECT_ITEM or action == xbmcgui.ACTION_ENTER or action == xbmcgui.ACTION_PLAY:
-                self.playVideo()
-
-        if action == xbmcgui.ACTION_STOP \
-                or action == xbmcgui.ACTION_PREVIOUS_MENU or action == xbmcgui.ACTION_NAV_BACK:
+        if action in (xbmcgui.ACTION_STOP, xbmcgui.ACTION_PREVIOUS_MENU, xbmcgui.ACTION_NAV_BACK):
             if self.isVideoPlaying:
                 self.stopVideo()
             else:
@@ -68,8 +73,6 @@ class MediaWindow(xbmcgui.WindowXMLDialog):
         self.player.stop()
 
     def onPlayBackStarted(self):
-        # This sleep prevents seeing the main background.
-        time.sleep(0.1)
         self.blackOverlay.setVisible(False)
         self.img.setVisible(False)
         self.isVideoPlaying = True
@@ -82,19 +85,10 @@ class MediaWindow(xbmcgui.WindowXMLDialog):
 
     def setContent(self):
         self.img.setImage(self.iterator.getCurrUrl(), True)
-
-        if self.iterator.isCurrVideo():
-            self.playButton.setVisible(True)
-        else:
-            self.playButton.setVisible(False)
+        self.playButton.setVisible(self.iterator.isCurrVideo())
 
 
-# Class to capture callbacks for when video has started / stopped
 class MediaWindowPlayer(xbmc.Player):
-
-    def __new__(cls, *args, **kwargs):
-        return super(MediaWindowPlayer, cls).__new__(cls)
-
     def __init__(self, mediaWindow, *args, **kwargs):
         self.mediaWindow = mediaWindow
         super(MediaWindowPlayer, self).__init__(*args, **kwargs)
@@ -107,4 +101,3 @@ class MediaWindowPlayer(xbmc.Player):
 
     def onPlayBackEnded(self):
         self.mediaWindow.onPlayBackStopped()
-
