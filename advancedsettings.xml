@@ -1,0 +1,38 @@
+<advancedsettings>
+  <pathsubstitution>
+    <substitute>
+      <from>special://database</from>
+      <to>smb://192.168.1.14/kodi/userdata/Database</to>
+    </substitute>
+    <substitute>
+      <from>special://thumbnails</from>
+      <to>smb://192.168.1.14/kodi/userdata/Thumbnails</to>
+    </substitute>
+  </pathsubstitution>
+  <videodatabase>
+    <type>mysql</type>
+    <host>192.168.1.27</host>
+    <port>3306</port>
+    <user>kodi</user>
+    <pass>kodi123#</pass>
+  </videodatabase>
+  <musicdatabase>
+    <type>mysql</type>
+    <host>192.168.1.27</host>
+    <port>3306</port>
+    <user>kodi</user>
+    <pass>kodi123#</pass>
+  </musicdatabase>
+  <videolibrary>
+    <importwatchedstate>true</importwatchedstate>
+    <importresumepoint>true</importresumepoint>
+  </videolibrary>   <cache>
+    <buffermode>1</buffermode>
+    <memorysize>104857600</memorysize>
+    <readfactor>4</readfactor>
+    <chunksize>524288</chunksize>
+  </cache>
+  <samba>
+    <statfiles>false</statfiles>
+  </samba>
+</advancedsettings>
