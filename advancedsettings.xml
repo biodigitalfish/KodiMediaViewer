@@ -2,11 +2,11 @@
   <pathsubstitution>
     <substitute>
       <from>special://database</from>
-      <to>smb://192.168.1.14/kodi/userdata/Database</to>
+      <to>smb://kodi:kodi123#@192.168.1.14/kodi/userdata/Database</to>
     </substitute>
     <substitute>
       <from>special://thumbnails</from>
-      <to>smb://192.168.1.14/kodi/userdata/Thumbnails</to>
+      <to>smb://kodi:kodi123#@192.168.1.14/kodi/userdata/Thumbnails</to>
     </substitute>
   </pathsubstitution>
   <videodatabase>
